@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+	<title>Open Page</title>
+	<style>
+		html, body { /*make the body fill the entire page*/
+			margin: 0;
+			height: 100%;
+		}
+		body {
+			background-color: black; 
+			padding: 0;
+			align-items: center;
+			cursor: url(star.png), auto; /* set cursor as star image */
+			}
+
+		header {
+			display: flex; 
+			justify-content: center; /* display in center no matter width */
+			min-height: 70%; /* only take up 70% of page */
+			position: relative;
+			text-align: center; /* text centered */
+			font-size: 80px;
+			background-image: url('https://t4.ftcdn.net/jpg/00/59/95/89/360_F_59958917_1SvEPqvKnrGr68THJ35hqQUiHwQ6WhCN.jpg'); /* make text background image */
+			background-position: center;
+			background-repeat: repeat;
+			-webkit-background-clip: text; /* make text background image */
+            -webkit-text-fill-color: transparent; /* make text background image */
+       		-webkit-text-stroke: 1px white; /* outline text */
+       		/*from: https://www.sliderrevolution.com/resources/css-text-animation/ neon lights*/
+       		-webkit-animation: glow 3s ease-in-out infinite alternate;
+  			-moz-animation: glow 3s ease-in-out infinite alternate;
+  			animation: glow 3s ease-in-out infinite alternate;
+       		
+		}
+
+		/*from: https://www.sliderrevolution.com/resources/css-text-animation/ neon lights*/
+		@-webkit-keyframes glow {
+     	from {
+      		color: #fff;
+    		text-shadow: 0 0 5px #DAD16F, 0 0 10px #DAD16F, 0 0 15px #DAD16F, 0 0 20px #DAD16F, 0 0 25px #DAD16F, 0 0 30px #DAD16F, 0 0 35px #DAD16F, 0 0 45px #DAD16F;
+  		}
+  
+  		to {
+     		color: gray;
+    		text-shadow: 0 0 10px #DAD16F, 0 0 15px #DAD16F, 0 0 20px #DAD16F, 0 0 25px #DAD16F, 0 0 30px #DAD16F, 0 0 35px #DAD16F, 0 0 40px #DAD16F, 0 1 45px #DAD16F;
+  		}		
+		}
+
+		.centered-header { 
+		    width: 80%;             /* Set the desired width */ 
+		    margin: 0 auto;         /* Center the element horizontally */ 
+		    text-align: center;     /* Optional: Center the text within the element */ 
+		} 
+
+	
+   
+	    
+
+	    #getstarted { /* link to website pg */
+	     	text-align: center;
+	     	left: 50%;
+	     	font-size: 40px;
+	     	bottom: 10vh;	
+	     	color:white;
+	    }
+
+	    a:link {
+	     	color: white; /* make sure get started is white */
+	    }
+	    a:hover {
+	    	font-weight: bold;
+	    }
+
+	    a:visited {
+	     	color: White; /* make sure get started stays white  */
+	    }
+
+	    /* copied from https://www.youtube.com/watch?v=MiUGn9QPYcs */
+	    .star {
+	     	position:fixed; 
+	     	pointer-events: none;
+
+	    }
+
+	    .star:before, .star:after {
+	     	position: absolute;
+	     	top: 0;
+	     	left: 0;
+	     	right: 0; 
+	     	content: '+';
+	     	font-size: 9px;
+	    }
+
+	    .star:before {
+	     	color: transparent;
+	     	text-shadow: 0 0 3px rgb(250, 250, 174);
+	    }
+
+	    .star:after {
+	     	background:yellow;
+	     	-webkit-background-clip: text;
+	     	-webkit-text-fill-color: transparent;
+
+	    }
+
+	</style>
+	</head>
+<body>
+	
+	<header class=centered-header>
+		<h1>Stargazer's <br>Guide</h1>
+	</header>
+	<div id=getstarted>
+		<a href="https://neogeoweb.ca/group2/assignment4/weatherTree.html">Get Started!</a>
+	</div>
+
+	<script>
+     /* copied from https://www.youtube.com/watch?v=MiUGn9QPYcs */
+
+		window.addEventListener('mousemove', function(e) {
+     		var arr = [1, 0.9, 0.8, 0.5, 0.2];
+      		arr.forEach(function(i) {
+       			var x = (1 - i) * 75;
+        		var star = document.createElement('div');
+				star.className = 'star';
+        		star.style.top = e.pageY + Math.round(Math.random() * x - x / 2) + 'px';
+        		star.style.left = e.pageX + Math.round(Math.random() * x - x / 2) + 'px';
+        		document.body.appendChild(star);
+        		window.setTimeout(function() {
+          			document.body.removeChild(star);
+        		}, Math.round(Math.random() * i * 600));
+      		});
+    	}, false);
+	</script>
+		
+</body>
+</html>
