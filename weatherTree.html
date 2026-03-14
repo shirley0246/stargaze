@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stargazer's guide</title>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> 
+    <style>
+        body { 
+            margin: 0; 
+            padding: 0; 
+             background-image: url(https://t4.ftcdn.net/jpg/00/59/95/89/360_F_59958917_1SvEPqvKnrGr68THJ35hqQUiHwQ6WhCN.jpg); /* star background */
+            background-size: 100%;
+        }
+
+        #map { 
+            width: 95%; /*width of the map takes up 95% of the page*/
+            height: 730px; /*set the height of the page to a reasonable value*/
+            align-self: center; /*center the map*/
+            border-radius: 5px; /*make the border angle round*/
+            border: 3px white;
+            border-style: double;
+            position: relative; /*relative position to apply z-index*/
+            z-index: 1; /*Move the map behind toggle bars*/
+            margin: 20px; /*Make sure map has margin around it*/
+        } 
+        #intro {
+            width: 80%; /*set width to 80%*/
+            height: auto; /*set height to length of text*/
+            margin: auto;       
+            border: 3px white; 
+            border-style: double;
+            padding: 5px;
+            color: white;
+            margin-bottom: 20px; /* make sure divs aren't touching */
+        }
+
+        #allInfo {
+            opacity: 0;
+            animation: fadeIn 2s forwards; /*add animation*/
+        }
+        @keyframes fadeIn {
+            to {
+                opacity: 1; /*fade from 0 to 1*/
+            }
+        }
+
+        #information {
+            display: grid;
+            grid-template-columns: 25% 35% auto;
+            grid-template-rows: 70px 70px;
+            column-gap: 10px;
+            align-items: start;
+            justify-items: start;
+            border: 3px white; 
+            border-style: double;
+            margin: 10px;
+        }
+        #tempInfo{
+            width: 80%; /*set width to 80%*/
+            height: auto; /*set height to length of text*/
+            margin: auto; 
+            grid-column: 1/span 1; 
+            grid-row: 1/span 2;        
+            /*border: 3px white;
+            border-style: double;*/
+            color: white;
+        }
+        #time {
+            /*width: 80%; /*set width to 80%*/
+            height: auto; /*set height to length of text*/
+            margin: auto; 
+            grid-column: 2/span 1; 
+            grid-row: 2/span 1;        
+            /*border: 3px white;
+            border-style: double;*/
+            color: white;
+            align-self: start;
+        }
+        #city {
+            /*width: 80%; /*set width to 80%*/
+            height: auto; /*set height to length of text*/
+            margin: auto; 
+            grid-column: 2/span 1; 
+            grid-row: 1/span 1;        
+            /*border: 3px white;
+            border-style: double;*/
+            padding: 5px;
+            color: white;
+            /*align-self: start; /*put text at the top of the grid*/
+        }
+        #outfit{
+            /*width: 80%; /*set width to 80%*/
+            height: auto; /*set height to length of text*/
+            margin: auto;  
+            grid-column: 3/span 2;   
+            grid-row: 1/span 1;     
+            /*border: 3px white;
+            border-style: double;*/
+            color: white;
+            padding: 10px;
+        }
+        
+
+        .navbar {
+            background-color: transparent; /* Background color for navbar */
+            overflow: hidden;
+            display: flex; /* Use flexbox for layout */
+            padding-left: 10px;
+            align-items: center; /* Vertically center items */
+            justify-content: flex-start; /* align everythingt to the left*/
+            padding: 10px 20px; /* Add padding for aesthetics */
+            color: white; /* make color of text white*/
+            gap: 20px; /* Add some space between the header and the buttons */
+
+        }
+
+        
+
+        .nav-links {
+            list-style: none; /* Remove bullet points */
+            margin: 0; /* Remove default margin */
+            padding: 0; /* Remove default padding */
+            display: flex; /* Use flexbox for horizontal layout */
+            align-items: center; /* Vertically center the buttons */
+            gap: 10px; /* Add space between buttons */
+        }
+
+        .nav-links li {
+            padding-top: 0; /* Remove padding to vertically center in the nav bar */
+        }
+
+        .nav-links a {
+            color: white; /* Link color */
+            text-decoration: none; /* Remove underline */
+            font-size: 0.8rem; /* Font size for links */
+            padding: 10px 15px; /* Increase padding for bigger clickable area */
+            /*border: 2px solid #4e5965; /* Border color and thickness for the frame */
+            transition: background-color 0.3s ease; /* Smooth hover effect */
+            display: inline-block; /* Ensure padding applies evenly around text */
+        }
+
+        .nav-links a:hover {
+            background-color:  rgba(0, 0, 0, .50); /* Background color on hover */
+        }
+
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>Stargazer's Guide</h1>
+        <ul class="nav-links">
+            <li><a href="https://neogeoweb.ca/group2/assignment4/openPage.html">Home Page</a></li>
+        </ul>
+    </nav>
+
+  
+    <div id="intro">
+         <p>Welcome to Chile, stargazers! Click anywhere on the map and get the weather conditions of the nearest city. We'll tell you the temperature, the likelihood (and resulting type) of precipitation, the wind intensity, humidity, and cloud cover. Not used to Chile's current weather and unsure what to wear, have with you or do? We will tell you! If you're checking stargazing conditions during the day, we will tell you the predicted weather for 12AM.</p>
+    </div>
+
+    <div id="information">
+        <p id="tempInfo"></p>
+        <p id="time"></p>
+        <p id="city">Please select a city.</p>
+        <p id="outfit"></p> <!-- outfit selection -->
+        <!--<p id="stargaze"></p> stargaze condition -->
+    </div>
+
+
+    <div id="map"></div> <!-- placement of map on html page --> 
+    <pre id="info"></pre>
+
+
+
+<script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoiYWxvbmFhbCIsImEiOiJjbTB3bG5nOWwwM2VvMmpvZXdvN285eDJ2In0.9HUQ1ypRtH_SrXYBi5HIrA'; //pk.eyJ1Ijoic2x5dzAyNDYiLCJhIjoiY20wdjhvNGtvMWg1ZTJpcTVuc3E0NXp5YyJ9.WMIP4DPHgpFwrqKGTEf0FA (old token)
+    //const apiKey = 'ZzCXqGUQ5EH7RfUjyNDsGv5YUxMCSD7X'; //violet API KEY
+    const map = new mapboxgl.Map({
+        container: 'map', // container ID
+        style: 'mapbox://styles/alonaal/cm39o0eh900bg01o103k30vl4', // set style for the map mapbox://styles/mapbox/streets-v12 (older style)
+        center: [-70, -35], // starting position [lng, lat]. Note that lat must be set between -90 and 90
+        zoom: 3 // starting zoom
+    }); 
+
+
+
+    var allCoords = []; // create an empty array to store all coordinates
+    var cityObj = {}; // create an object to get city name with corresponding latitude
+    // get geojson from file, code from chatgpt
+    let geoJson
+    fetch('chile.geojson')
+        .then(response => response.json())
+        .then(data => { // give this parameter a name called data
+            geoJson = data // store data into geoJson
+            console.log("This is the geoJson data:", geoJson); 
+        for (i=0; i<geoJson.features.length; i++) { // loop till the length of geoJSON
+            allCoords.push(geoJson.features[i].geometry.coordinates); // push the coordinates of each feature to the array
+            var latIn = geoJson.features[i].properties.lat; // get the latitude as property of object
+            cityObj[latIn] = geoJson.features[i].properties.city; // get the city name as the value
+        }
+        
+    })
+        .catch(error => console.error('Error loading GeoJSON:', error));
+
+    console.log("All coordinates of cities in Chile: ", allCoords);
+    console.log("The city object is: ", cityObj); 
+    //console.log("This is the geoJson data:", geoJson); 
+    
+
+    var smallest = Infinity; // the smallest distance at to infinity for later use
+    var closestPoint; // closest coordinates
+    function closest(coordinates) {
+        for (i=0; i<allCoords.length; i++) { // loop till the length of allCoords array
+            // find absolute difference between the clicked coordinates and the coordinates of the cities in the array
+            let lngDiff = Math.abs(coordinates[0]-allCoords[i][0]);
+            let latDiff = Math.abs(coordinates[1]-allCoords[i][1]);
+            let totalDiff = lngDiff + latDiff; // total difference by adding lng and lat diff
+            if (totalDiff < smallest) { // if total diff is smaller than the variable smallest
+                smallest = totalDiff; // replace
+                closestPoint = allCoords[i]; // the closest point will change to this element in the array
+            }
+        }
+        smallest = Infinity; // reset smallest to infinity for each click
+        return closestPoint;
+    }
+
+
+    
+    //var inputCoords; // create a variable for input in api call
+    map.on('click', (e) => {
+        var coords = e.lngLat.toArray(); // get longitude and latitude in array
+        var snapCoords = closest(coords); // use the function to snap to closest city
+        var getCity = cityObj[snapCoords[1]]; // get the city name using bracket notation for latitude
+        // log the city in HTML
+        document.getElementById('city').innerHTML = "The city you have selected is " + getCity + ".";
+        //inputCoords = coordinateDivision(snapCoords);
+        getData(snapCoords); // call the getData API function
+        addPoints(snapCoords); // add points to the map
+    })
+
+    
+    // create a function to add marker using input coordinates
+    var pointList = [] // an array to take all the markers
+    function addPoints(coordinates) {
+        const newPoint = new mapboxgl.Marker() // add a new marker
+            .setLngLat(coordinates) // use the parameter as coordinates
+            .addTo(map) // add to map
+        pointList.push(newPoint); // push the point to the list
+        if (pointList.length>1) { // is there is more than one element in the list
+            pointList[0].remove(); // remove the first point from the map
+            pointList.shift(pointList[0]); // remove the first value from the list
+        }
+        //console.log("current values: ", pointList);
+    } 
+
+
+    function coordinateDivision(receivedCoordinates) {
+      // assume receivedCoordinates has the same format [Lat, Long]; 
+      // the format is [lng, lat]
+        let latVal = receivedCoordinates[1]; 
+        let longVal = receivedCoordinates[0]; 
+        // console.log("Coordinates received: ", latVal, longVal); 
+
+        function coordsToAPI(latVal, longVal) {
+            latitude = latVal; 
+            longitude = longVal; 
+            return latitude + ',' + longitude; 
+        }
+        //calling nested function and returning result: 
+        return coordsToAPI(latVal, longVal); 
+    }; 
+
+
+    var serverReturn; // create a global variable to store data from the API
+
+    function getData(coordsInput) { 
+
+        //API call concotenation: 
+
+        const apiURL = "https://api.tomorrow.io/v4/weather/forecast"; 
+        const queryStart = "?"; 
+
+        //let lat = latitude; 
+        //let long = longitude;
+        let coordsAPI = coordinateDivision(coordsInput); // call the function to get coordinates
+
+        //const coordinates = "location=" + lat + "," + long; 
+        const coordinatesIn = "location=" + coordsAPI;
+        const and = "&";
+        const apiKey = "apikey=ZzCXqGUQ5EH7RfUjyNDsGv5YUxMCSD7X"; 
+        const time = "timesteps=1h"
+
+        // concatenate API URL
+        let apiCall = apiURL + queryStart + coordinatesIn + and + apiKey + and + time; 
+
+        console.log(apiCall); 
+
+        $.get(apiCall, function(data, status) {
+            serverReturn = data; // data will be in JSON format 
+            //alert("Data: " + data + "\nStatus" + status); 
+
+            console.log("Data received:", data); //seeing what was reeceived; 
+            console.log("Data stored in serverReturn:", serverReturn); //seeing what is stored in global variable; 
+          
+            let serverReturnStringified = JSON.stringify(serverReturn); 
+            console.log(serverReturnStringified); //seeing stringified version 
+
+            // time query
+            // UK time to chile -3
+            var timeUK = serverReturn.timelines.hourly[0].time;
+            var hourChile = parseInt(timeUK.slice(11, 13)) - 3; // slice to the hour number and convert it from string format to number 
+            // account for the time on the next day
+            if (hourChile == -3) { 
+                hourChile = 21;
+            } else if (hourChile == -2) {
+                hourChile = 22;
+            } else if (hourChile == -1) {
+                hourChile = 23;
+            }
+            console.log("the hour in Chile is:", hourChile);
+
+            // if the time in Chile is not between 22 and 5, the hourly index stays 0, returns the current weather data
+            var iHour; // hour index
+            if (hourChile >= 21 && hourChile <= 23 || hourChile >= 0 && hourChile <=5) {
+                iHour = 0;
+                document.getElementById('time').innerHTML = "The hour in Chile is " + hourChile + ":00.";
+            } else { // if the time is during the day, will return the weather at 0am
+                iHour = getIndex(hourChile);
+                document.getElementById('time').innerHTML = "The hour in Chile is " + hourChile + ":00. Since it's not the time for stargazing, we will provide weather information and suggestions for 12am the next day for a more accurate stargazing prediction.";
+            }
+
+            // get the index of hour at each hour
+            function getIndex(inputHour) {
+                return 24 - inputHour; // 24 - input hour, the amount of index to get to 0am
+            }
+            console.log("the hourly index is:", iHour)
+
+          
+            // call weather items from the API
+            var temp = serverReturn.timelines.hourly[iHour].values["temperature"]; //create temp variable
+            var precip = serverReturn.timelines.hourly[iHour].values["precipitationProbability"]; //create precip variable
+            var wind = serverReturn.timelines.hourly[iHour].values["windGust"]; //create wind variable
+            var humidity = serverReturn.timelines.hourly[iHour].values["humidity"]; // create humidity variable
+            var cloudCover = serverReturn.timelines.hourly[iHour].values["cloudCover"]; // create cloud cover variable
+
+            // create a paragraph for weather information
+            var weather = document.getElementById('tempInfo'); // get tempinfo paragraph
+            weather.innerHTML = "The temperature is " + temp + " degree Celcius. <br> The precipitation probability is " + precip +" %. <br> The wind gust is " + wind + " mph. <br> The humidity is " + humidity + " %. <br> The cloud cover is " + cloudCover + " %."; // write html with weather information
+
+            // create a paragraph for outfit advice
+            var outfit = document.getElementById('outfit'); // get outfit paragraph
+
+            // advice for stargazing by cloud cover and humidity
+            var starAdvice;
+
+            // define strings for concatenation
+            let highCloud = "high percentage of cloud cover";
+            let highHum = "high percentage of humidity";
+            let midCloud = "moderate cloud cover";
+            let midHum = "moderate humidity";
+            let lowCloud = "clear sky";
+            let lowHum = "low humidity which means high visibility";
+            let badCond = "Consider checking back later.";
+            let okCond = "Stargazing is possible but you can consider another time";
+            let goodCond = "Great time to go stargazing!";
+            let perfectCond = "This is the perfect time to go stargazing!"
+
+            //DOM tree for fashion and stargazing advice 
+            if (cloudCover >= 70) { // high cloud cover
+                if (humidity >= 70) { // high humidity
+                    starAdvice = "There is " +  highCloud + " and " + highHum + ". Which means stars might not be visible at this time. " + badCond;
+                } else if (humidity < 50) { // low humidity
+                    starAdvice = "There is " +  highCloud + " and " + lowHum + ". You can see the stars but they might be covered by clouds. " + okCond;
+                } else if (humidity < 70 && humidity >= 50) { // midium humidity
+                    starAdvice = "There is " +  highCloud + " and " + midHum + ". This might not be the best time to stargaze since the visibility is not great. " + badCond;
+                }
+            } else if (cloudCover < 30) { // low cloud cover
+                if (humidity >= 70) { // high humidity
+                    starAdvice = "There is " +  lowCloud + " and " + highHum + ". There might be haze outside that impact visibility. " + okCond;
+                } else if (humidity < 50) { // low humidity
+                    starAdvice = "There is " +  lowCloud + " and " + lowHum + ". " + perfectCond;
+                } else if (humidity < 70 && humidity >= 50) { // mid humidity
+                    starAdvice = "There is " +  lowCloud + " and " + midHum + ". " + goodCond;
+                }
+            } else if (cloudCover >= 30 && cloudCover < 70) { // mid cloud cover
+                if (humidity >= 70) { // high humidity
+                    starAdvice = "There is " +  midCloud + " and " + highHum + ". This is not a good time to go stargazing with clouds and low visibility. " + badCond;
+                } else if (humidity < 50) { // low humidity
+                    starAdvice = "There is " +  midCloud + " and " + lowHum + ". " + goodCond;
+                } else if (humidity < 70 && humidity >= 50) { // mid humidity
+                    starAdvice = "There is " +  midCloud + " and " + midHum + ". The visibility is not perfect and some parts of the sky is not visible. " + okCond;
+                }
+            }
+
+            // clothing advice by temperature, precipitation probability, and wind gust
+            var clothAdvice;
+            if (temp >= 30) { //if temp is hot
+                if (precip >= 80) { //if temp is hot and rainy
+                    if (wind > 25) { // if temp is hot and rainy and windy
+                        clothAdvice = "It is hot, rainy and very windy. Please stay safe, wear a protective rain coat, waterproof shoes and consider stargazing another night. Don't bring a leather bag!";
+                    } else if (wind > 10.5) { 
+                        clothAdvice = "It is hot, rainy and windy. Please wear a light rain jacket and waterproof shoes. Wear light fabrics, like linen pants. Don't bring a leather bag! Make sure you have a waterproof blanket to lie on.";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is hot, rainy and breezy. Please wear a light rain jacket and waterproof shoes. Consider bringing an umbrella. Wear light fabrics. You might want to wear a dress or shorts (if you don't mind you legs getting wet!) Don't bring a leather bag! Make sure you have a waterproof blanket to lie on.";
+                    } else {
+                        clothAdvice = "It is hot and rainy. Please consider wearing a light rain jacket and waterproof shoes. You might want to bring an umbrella too, espeically if your rain jacket doesn't have a hood. Wear light fabrics. You might want to wear a dress or shorts. (If you don't mind your legs getting wet!) Don't bring a leather bag! Make sure you have a waterproof blanket to lie on.";
+                    }
+                } else if (precip >= 50) {
+                    if (wind > 25) {
+                        clothAdvice = "It is hot and extremely windy. It is likely to rain, you might benefit from wearing a rainproof jacket. Stay safe, consider stargazing another night. Don't bring a leather bag! Make sure you have a waterproof blanket to lie on.";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is hot, windy, and likely to rain. Bring a rain jacket with you! Wear light fabrics. You might want to wear a dress or shorts. (If you don't mind your legs getting wet!) Don't bring a leather bag! Make sure you have a waterproof blanket to lie on.";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is hot, breezy and likely to rain. Wear minimal or lightweight fabric, like linen or cotton. You might want to wear shorts or a dress, at the risk of getting a little wet! Bring a rain jacket, just in case. Don't bring a leather bag! Make sure you have a waterproof blanket to lie on."
+                    } else {
+                        clothAdvice = "It is hot and likely to rain. Wear minimal or lightweight fabric, like linen or cotton. You might want to wear shorts or a dress, at the risk of getting a little wet! Bring a rain jacket, just in case. Don't bring a leather bag! Make sure you have a waterproof blanket to lie on."
+                    }
+                } else if (precip >=20) {
+                    if (wind > 25) {
+                        clothAdvice = "It is hot and extremely windy. It may rain, you might benefit from bringing a rainproof jacket in case. Stay safe, consider stargazing another night. Make sure you have a  blanket to lie on.";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is hot, windy, and may rain. Bring a rain jacket with you in case! Wear light fabrics. You might want to wear a dress or shorts. Make sure you have a  blanket to lie on.";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is hot, breezy and may rain. Wear minimal or lightweight fabric, like linen or cotton. You might want to wear shorts or a dress. Bring a rain jacket, just in case. Make sure you have a  blanket to lie on."
+                    } else {
+                        clothAdvice = "It is hot and may rain. Wear minimal or lightweight fabric, like linen or cotton. You might want to wear shorts or a dress! Bring a rain jacket, just in case. Make sure you have a  blanket to lie on."
+                    }
+                } else { 
+                     if (wind > 25) {
+                        clothAdvice = "It is hot and extremely windy. Stay safe, consider stargazing another night. If you go out, wear long lightweight pants and a linen or cotton long sleeve. Make sure you have a  blanket to lie on.";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is hot and windy. Wear light fabrics. You might want to wear a dress or shorts. Sandals or open toed shoes would be a good option! Make sure you have a blanket to lie on.";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is hot and breezy. Wear shorts, a skirt or a dress. On top, wear a t-shirt or tank top. Sandals or open toed shoes would be a good option! Make sure you have a blanket to lie on."
+                    } else {
+                        clothAdvice = "It is hot with no breeze. Wear minimal or lightweight fabric, like linen or cotton. You might want to wear shorts and a t-shirt or tank top. You could also wear a dress. Consider sandals or open toed shoes! Make sure you have a blanket to lie on."
+                    }
+                }
+            } else if (temp >= 20) {
+                if (precip >= 80) {
+                    if (wind > 25) {
+                        clothAdvice = "It is warm, rainy and very windy. Please stay safe, wear a protective rain coat, waterproof shoes and consider stargazing another night.";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is warm, rainy and windy. Please wear a light rain jacket and waterproof shoes. Wear light fabrics, like linen pants. You may wish to bring an extra layer to lie down on while stargazing, or throw around your shoulders.";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is warm, rainy and breezy. Please wear a light rain jacket and waterproof shoes. Consider bringing an umbrella. Wear light fabrics. You might want to wear a dress or shorts (if you don't mind you legs getting wet!) You may wish to bring an extra layer to lie down on while stargazing, or throw around your shoulders.";
+                    } else {
+                        clothAdvice = "It is warm and rainy. Please consider wearing a light rain jacket and waterproof shoes. You might want to bring an umbrella too, espeically if your rain jacket doesn't have a hood. Wear light fabrics. You might want to wear a dress or shorts. (If you don't mind your legs getting wet!) You may wish to bring an extra layer to lie down on while stargazing, or throw around your shoulders.";
+                    }
+                } else if (precip >= 50) {
+                    if (wind > 25) {
+                        clothAdvice = "It is warm and extremely windy. It is likely to rain, you might benefit from wearing a rainproof jacket. Stay safe, consider stargazing another night.";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is warm, windy, and likely to rain. Bring a rain jacket with you! Wear light fabrics. You might want to wear a dress or shorts. (If you don't mind your legs getting wet!). You may wish to bring an extra layer to lie down on while stargazing, or throw around your shoulders.";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is warm, breezy and likely to rain. Wear minimal or lightweight fabric, like linen or cotton. You might want to wear shorts or a dress, at the risk of getting a little wet! Bring a rain jacket, just in case. You may wish to bring an extra layer to lie down on while stargazing, or throw around your shoulders."
+                    } else {
+                        clothAdvice = "It is warm and likely to rain. Wear minimal or lightweight fabric, like linen or cotton. You might want to wear shorts or a dress, at the risk of getting a little wet! Bring a rain jacket, just in case. You may wish to bring an extra layer to lie down on while stargazing, or throw around your shoulders."
+                    }
+                } else if (precip >=30) {
+                    if (wind > 25) {
+                        clothAdvice = "It is warm and extremely windy. It may rain, you might want to bring along a rainproof jacket in case. Stay safe, consider stargazing another night.";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is warm, windy, and may  rain. Bring a rain jacket with you in case! Wear light fabrics. You might want to wear a dress or shorts. (If you don't mind your legs getting wet!). You may wish to bring an extra layer to lie down on while stargazing, or throw around your shoulders.";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is warm, breezy and may  rain. Wear minimal or lightweight fabric, like linen or cotton. You might want to wear shorts or a dress, at the risk of getting a little wet! Bring a rain jacket, just in case. You may wish to bring an extra layer to lie down on while stargazing, or throw around your shoulders."
+                    } else {
+                        clothAdvice = "It is hot and may rain. Wear minimal or lightweight fabric, like linen or cotton. You might want to wear shorts or a dress, at the risk of getting a little wet! Bring a rain jacket, just in case. You may wish to bring an extra layer to lie down on while stargazing, or throw around your shoulders."
+                    }
+                } else { 
+                     if (wind > 25) {
+                        clothAdvice = "It is warm and extremely windy. Stay safe, consider stargazing another night. Wear light-weight pants and a cotton or linen long sleeve skirt.";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is warm and windy. Wear light fabrics. You might want to wear a dress or shorts and a t-shirt. Consider open-toed shoes or sandals. You may wish to bring an extra layer to lie down on while stargazing, or throw around your shoulders.";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is warm and breezy. Wear minimal or lightweight fabric, like linen or cotton. You might want to wear shorts or a dress. Consider open toed shoes or sandals. You may wish to bring an extra layer to lie down on while stargazing, or throw around your shoulders."
+                    } else {
+                        clothAdvice = "It is warm with hardly a breeze. Wear minimal or lightweight fabric, like linen or cotton. You might want to wear shorts and a tank-top or a dress. Bring a blanket to lie down on."
+                    } 
+                }                    
+            } else if (temp >= 15) {
+                if (precip >= 80) {
+                    if (wind > 25) {
+                        clothAdvice = "It is temperate, rainy and very windy. Please stay safe, wear a protective rain coat, waterproof shoes and consider stargazing another night.";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is temperate, rainy and windy. Please wear a light rain jacket and waterproof shoes. Wear pants and long sleeves.";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is temperate, rainy and breezy. Please wear a rain jacket and waterproof shoes. Consider bringing an umbrella. You might want to wear pants and a long-sleeve top.";
+                    } else {
+                        clothAdvice = "It is temperate and rainy. Please consider wearing a rain jacket and waterproof shoes. You might want to bring an umbrella too, espeically if your rain jacket doesn't have a hood. Wear pants and a long-sleeve top.";
+                    }
+                } else if (precip >= 50) {
+                    if (wind > 25) {
+                        clothAdvice = "It is temperate and extremely windy. It is likely to rain, you might benefit from wearing a rainproof jacket. Stay safe, consider stargazing another night.";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is temperate, windy, and likely to rain. Bring a rain jacket with you! Wear pants and a long-sleeve top.";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is temperate, breezy and likely to rain. You might want to wear long-sleeves and pants. Bring an umbrella. (Or rain coat!)"
+                    } else {
+                        clothAdvice = "It is temperate and likely to rain. Wear pants and long sleeves, or a t-shirt and extra layer! Bring a rain jacket or umbrella, just in case."
+                    }
+                } else if (precip >=30) {
+                    if (wind > 25) {
+                        clothAdvice = "It is temperate and extremely windy. It may rain, bring along a rainproof jacket. Stay safe, consider stargazing another night.";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is temperate, windy, and may rain. Bring a rain jacket with you, just in case! Wear long-sleeves and pants.";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is temperate, breezy and may rain. Wear long-sleeves and pants! Bring a rain jacket or umbrella, just in case."
+                    } else {
+                        clothAdvice = "It is temperate and may rain. Wear long sleeves and pants. Bring a rain jacket or umbrella, just in case."
+                    }
+                } else { 
+                     if (wind > 25) {
+                        clothAdvice = "It is temperate and extremely windy. Wear pants and long sleeves. Stay safe, consider stargazing another night.";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is temperate and windy. Wear pants and long sleeves, bring an extra layer with you to sit down on.";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is temperate and breezy. Wear pants and long sleeves, or short sleeves and an extra layer to be safe. If you don't wear it, you can sit down on it and stargaze more comfortably!"
+                    } else {
+                        clothAdvice = "It is temperate with minimal breeze. Wear pants and long sleeves, or short sleeves and an extra layer to be safe. If you don't wear it, you can sit down on it and stargaze more comfortably!"
+                    } 
+                }    
+            } else if (temp >= 8) {
+                if (precip >= 80) {
+                    if (wind > 25) {
+                        clothAdvice = "It is chilly, rainy and very windy. Please stay safe, wear a protective rain coat, waterproof shoes and consider stargazing another night. Wear pants and long sleeves, take 2-3 layers with you, and something to cover your neck if you run cold!";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is chilly, rainy and windy. Please wear a rain jacket and waterproof shoes. Wear pants and long sleeves, take 2-3 layers with you, and something to cover your neck if you run cold!";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is chilly, rainy and breezy. Please wear a rain jacket and waterproof shoes. Consider bringing an umbrella. Wear pants and long sleeves, take 2-3 layers with you, and something to cover your neck if you run cold!";
+                    } else {
+                        clothAdvice = "It is chilly and rainy. Please consider wearing a light rain jacket and waterproof shoes. You might want to bring an umbrella too, espeically if your rain jacket doesn't have a hood. Wear pants and long sleeves, take 2-3 layers with you, and something to cover your neck if you run cold!";
+                    }
+                } else if (precip >= 50) {
+                    if (wind > 25) {
+                        clothAdvice = "It is chilly and extremely windy. It is likely to rain, you might benefit from wearing a rainproof jacket. Stay safe, consider stargazing another night. Wear pants and long sleeves, take 2-3 layers with you, and something to cover your neck if you run cold!";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is chilly, windy, and likely to rain. Bring a rain jacket with you! Wear pants and long sleeves, take 2-3 layers with you, and something to cover your neck if you run cold!";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is chilly, breezy and likely to rain. Wear pants and long sleeves, take 2-3 layers with you, and something to cover your neck if you run cold! Bring a rain jacket or umbrella, just in case."
+                    } else {
+                        clothAdvice = "It is chilly and likely to rain. Wear pants and long sleeves, take 2-3 layers with you, and something to cover your neck if you run cold! Bring a rain jacket or umbrella, just in case."
+                    }
+                } else if (precip >=30) {
+                    if (wind > 25) {
+                        clothAdvice = "It is chilly and extremely windy. It may, you might benefit from bringing a rainproof jacket in case. Stay safe, consider stargazing another night. Wear pants and long sleeves, take 2-3 layers with you, and something to cover your neck if you run cold!";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is chilly, windy, and may rain. Bring a rain jacket with you in case! Wear pants and long sleeves, take 2-3 layers with you, and something to cover your neck if you run cold!";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is chilly, breezy and may rain. Wear pants and long sleeves, take 2-3 layers with you, and something to cover your neck if you run cold! Bring a rain jacket or umbrella, just in case."
+                    } else {
+                        clothAdvice = "It is chilly and may rain. Wear pants and long sleeves, take 2-3 layers with you, and something to cover your neck if you run cold! Bring a rain jacket or umbrella, just in case."
+                    }
+                } else { 
+                     if (wind > 25) {
+                        clothAdvice = "It is chilly and extremely windy. Wear pants and long sleeves, take 2-3 layers with you, and something to cover your neck if you run cold, a hat too! Stay safe, consider stargazing another night.";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is chilly and windy. Wear pants and long sleeves, take 2-3 layers with you, and something to cover your neck if you run cold! Make sure you hold on tight to your hat!";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is chilly and breezy. Wear pants and long sleeves, take 2-3 layers with you, and something to cover your neck if you run cold! Maybe make one of those layers a shell."
+                    } else {
+                        clothAdvice = "It is chilly with minimal breeze. Wear pants and long sleeves, take 2-3 layers with you, and something to cover your neck if you run cold."
+                    }
+                }
+            } else if (temp >= 0) {
+                if (precip >= 80) {
+                    if (wind > 25) {
+                        clothAdvice = "It is cold, rainy and very windy. Please stay safe, wear a protective rain coat, waterproof shoes and consider stargazing another night. Cover up. 3 layers, keep your neck warm and maybe a beanie too!";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is cold, rainy and windy. Please wear a warm rain jacket and waterproof shoes. Cover up. 3 layers, keep your neck warm and maybe a beanie too! Hold on to your hat!";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is cold, rainy and breezy. Please wear a warm rain jacket and waterproof shoes. Consider bringing an umbrella. Cover up. 3 layers, keep your neck warm and maybe a beanie too!";
+                    } else {
+                        clothAdvice = "It is cold and rainy. Please consider wearing a warm rain jacket and waterproof shoes. You might want to bring an umbrella too, espeically if your rain jacket doesn't have a hood. Cover up. 3 layers, keep your neck warm and maybe a beanie too!";
+                    }
+                } else if (precip >= 50) {
+                    if (wind > 25) {
+                        clothAdvice = "It is cold and extremely windy. It is likely to rain, you might benefit from wearing a rainproof jacket. Stay safe, consider stargazing another night. Cover up. 3 layers, keep your neck warm and maybe a beanie too!";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is cold, windy, and likely to rain. Bring a rain jacket with you, you can layer it over what you are wearing! Cover up. 3 layers, keep your neck warm and maybe a beanie too!";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is cold, breezy and likely to rain. Cover up. 3 layers, keep your neck warm and maybe a beanie too! Bring a rain jacket or umbrella, just in case. You can always wear the rain jacket on top of what you have on!"
+                    } else {
+                        clothAdvice = "It is cold and likely to rain. Cover up. 3 layers, keep your neck warm and maybe a beanie too! Bring a rain jacket or umbrella, just in case. You can always wear the rain jaket over what you have on."
+                    }
+                } else if (precip >=30) {
+                    if (wind > 25) {
+                        clothAdvice = "It is cold and extremely windy. It may rain, you might benefit from bringing along a rainproof jacket. Stay safe, consider stargazing another night. Cover up. 3 layers, keep your neck warm and maybe a beanie too!";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is cold, windy, and may rain. Bring a rain jacket with you in case. Cover up. 3 layers, keep your neck warm and maybe a beanie too!";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is cold, breezy and may rain. Cover up. 3 layers, keep your neck warm and maybe a beanie too! Bring a rain jacket or umbrella, just in case. You can always throw the rain jacket on over what you are already wearing."
+                    } else {
+                        clothAdvice = "It is cold and may rain. Cover up. 3 layers, keep your neck warm and maybe a beanie too! Bring a rain jacket or umbrella, just in case. Better safe than sorry!"
+                    }
+                } else { 
+                     if (wind > 25) {
+                        clothAdvice = "It is cold and extremely windy. Cover up. 3 layers, keep your neck warm and maybe a beanie too! Stay safe, consider stargazing another night.";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is cold and windy. Cover up. 3 layers, keep your neck warm and maybe a beanie too! Try a wind-proof shell.";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is cold and breezy. Cover up. 3 layers, keep your neck warm and maybe a beanie too! If you have one, it might be a good idea to make one of your layers a shell."
+                    } else {
+                        clothAdvice = "It is cold with minimal breeze. Cover up. 3 layers, keep your neck warm and maybe a beanie too!"
+                    }
+                }
+            } else if (temp >= -10) {
+                if (precip >= 80) {
+                    if (wind > 25) {
+                        clothAdvice = "It is freezing, snowy and very windy. Please stay safe, wear a protective winter coat, snow boots and consider stargazing another night. Bundle up! 3 layers if you have a good jacket or more if you don't. Mittens or Gloves, and a beanie.";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is freezing, snowy and windy. Please wear a winter jacket and snow boots. Bundle up! 3 layers if you have a good jacket or more if you don't. Mittens or Gloves, and a beanie.";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is freezign, snowy and breezy. Please wear a warm winter jacket and snow boots. Consider bringing an umbrella. Bundle up! 3 layers if you have a good jacket or more if you don't. Mittens or Gloves, and a beanie.";
+                    } else {
+                        clothAdvice = "It is freezing and snowy. Please consider wearing a warm winter jacket and  snowboots. You might want to bring an umbrella too, espeically if your jacket doesn't have a hood. Bundle up! 3 layers if you have a good jacket or more if you don't. Mittens or Gloves, and a beanie.";
+                    }
+                } else if (precip >= 50) {
+                    if (wind > 25) {
+                        clothAdvice = "It is freezing and extremely windy. It is likely to snow, you might benefit from wearing a waterproof winter jacket. Stay safe, consider stargazing another night. Bundle up! 3 layers if you have a good jacket or more if you don't. Mittens or Gloves, and a beanie.";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is freezing, windy, and likely to snow. Wear a waterproof winter jacket in case. Bundle up! 3 layers if you have a good jacket or more if you don't. Mittens or Gloves, and a beanie.";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is freezing, breezy and likely to snow. Bundle up! 3 layers if you have a good jacket or more if you don't. Mittens or Gloves, and a beanie. Wear a waterproof winter jacket, just in case."
+                    } else {
+                        clothAdvice = "It is freezing and likely to rain. Bundle up! 3 layers if you have a good jacket or more if you don't. Mittens or Gloves, and a beanie. Wear a waterproof winter jacket, just in case. You could bring an umbrella, too!"
+                    }
+                } else if (precip >=30) {
+                    if (wind > 25) {
+                        clothAdvice = "It is freezing and extremely windy. It may snow, you might benefit from wearing a waterproof jacket. Stay safe, consider stargazing another night. Bundle up! 3 layers if you have a good jacket or more if you don't. Mittens or Gloves, and a beanie.";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is freezing, windy, and may snow. Wear a waterproof jacket just in case! Bundle up! 3 layers if you have a good jacket or more if you don't. Mittens or Gloves, and a beanie.";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is freezing, breezy and may snow. Bundle up! 3 layers if you have a good jacket or more if you don't. Mittens or Gloves, and a beanie. Wear a waterproof jacket or bring a shell or umbrella, just in case."
+                    } else {
+                        clothAdvice = "It is freezing and may snow. Bundle up! 3 layers if you have a good jacket or more if you don't. Mittens or Gloves, and a beanie. Bring a waterproof shell or umbrella, or wear a waterproof winter jacket, just in case. Better safe than sorry!"
+                    }
+                } else { 
+                     if (wind > 25) {
+                        clothAdvice = "It is freezing and extremely windy. Bundle up! 3 layers if you have a good jacket or more if you don't. Mittens or Gloves, and a beanie. Stay safe, consider stargazing another night. Hold on to your hat and scarf!";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is freezing and windy. Bundle up! 3 layers if you have a good jacket or more if you don't. Mittens or Gloves, and a beanie. Ideally, bring along a wind-proof shell.";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is freezing and breezy. Bundle up! 3 layers if you have a good jacket or more if you don't. Mittens or Gloves, and a beanie."
+                    } else {
+                        clothAdvice = "It is freezing with minimal breeze. Bundle up! 3 layers if you have a good jacket or more if you don't. Mittens or Gloves, and a beanie."
+                    }
+                }
+            } else {
+                if (precip >= 80) {
+                    if (wind > 25) {
+                        clothAdvice = "It is extremely cold, snowy and very windy. Please stay safe, consider stargazing another night. If you decide to go out, wear skiing pants and jackets. Thermal underwear, a neck gaiter, hat, gloves and wool socks. Stargazing for those that can bear it! Make sure you have your snowboots on!";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is extremely cold, snowy and windy. Wear skiing pants and jackets. Thermal underwear, a neck gaiter, hat, gloves and wool socks. Stargazing for those that can bear it! Hold on to your hat and scarf, and put on your snowboots!";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is extremely cold, snowy and breezy. Wear skiing pants and jackets. Thermal underwear, a neck gaiter, hat, gloves and wool socks. Stargazing for those that can bear it! Bring your snowboots along.";
+                    } else {
+                        clothAdvice = "It is extemely cold and snowy. Skiing pants and jackets. Thermal underwear, a neck gaiter, hat, gloves and wool socks. Stargazing for those that can bear it! Bring along your snowboots.";
+                    }
+                } else if (precip >= 50) {
+                    if (wind > 25) {
+                        clothAdvice = "It is extremely cold and very windy. It is likely to snow, you might benefit from wearing a ski jacket and pants, along with snowboots. Wear thermal underwear, a neck gaiter, hat, gloves and wool socks. Stargazing for those that can bear it! Stay safe, consider stargazing another night.";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is extremely cold, windy, and likely to snow. Wear skiing pants and jackets along with snowboots. Thermal underwear, a neck gaiter, hat, gloves and wool socks. Stargazing for those that can bear it! Hold on to your scarves and hats!";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is extremely cold, breezy and likely to snow. Wear skiing pants and jackets. Thermal underwear, a neck gaiter, hat, gloves, snowboots and wool socks. Stargazing for those that can bear it!."
+                    } else {
+                        clothAdvice = "It is extremely cold and likely to snow. Wear skiing pants and jackets. Thermal underwear, a neck gaiter, hat, gloves and wool socks. Stargazing for those that can bear it! Bring along some snowboots, just in case."
+                    }
+                } else if (precip >=30) {
+                    if (wind > 25) {
+                        clothAdvice = "It is very cold and extremely windy. It may snow, you might benefit from wearing snowboots. Either way, they are warm! Skiing pants and jackets. Thermal underwear, a neck gaiter, hat, gloves and wool socks. Stargazing for those that can bear it! Stay safe, consider stargazing another night.";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is extremely cold, windy, and may snow. Wear skiing pants and jackets, consider wearing snowboots too. If you don't need them for the snowfall, at least your feet will stay warm! Thermal underwear, a neck gaiter, hat, gloves and wool socks. Stargazing for those that can bear it!";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is extremely cold, breezy and may snow. Wear skiing pants and jackets, consider wearing snowboots too. If you don't need them for the snowfall, at least your feet will stay warm! Thermal underwear, a neck gaiter, hat, gloves and wool socks. Stargazing for those that can bear it!."
+                    } else {
+                        clothAdvice = "It is extremely cold and may snow. Wear skiing pants and jackets, consider wearing snowboots too. If you don't need them for the snowfall, at least your feet will stay warm! Thermal underwear, a neck gaiter, hat, gloves and wool socks. Stargazing for those that can bear it!"
+                    }
+                } else { 
+                     if (wind > 25) {
+                        clothAdvice = "It is very cold and extremely windy. Wear skiing pants and jackets, wear warm shoes. Keep your fingers and toes safe! You could bring along disposable or electric heat packs, especially if you will be outside for a while. Thermal underwear, a neck gaiter, hat, gloves and wool socks. Stargazing for those that can bear it! Consider stargazing another night, stay safe!";
+                    } else if (wind > 10.5) {
+                        clothAdvice = "It is extremely cold and windy. Wear skiing pants and jackets, wear warm shoes. Keep your fingers and toes safe! You could bring along disposable or electric heat packs, especially if you will be outside for a while. Thermal underwear, a neck gaiter, hat, gloves and wool socks. Stargazing for those that can bear it!";
+                    } else if (wind > 5) {
+                        clothAdvice = "It is extremely cold and breezy. Wear skiing pants and jackets, wear warm shoes. Keep your fingers and toes safe! You could bring along disposable or electric heat packs, especially if you will be outside for a while. Thermal underwear, a neck gaiter, hat, gloves and wool socks. Stargazing for those that can bear it!"
+                    } else {
+                        clothAdvice = "It is extremely cold with minimal breeze. Wear skiing pants and jackets, wear warm shoes. Keep your fingers and toes safe! You could bring along disposable or electric heat packs, especially if you will be outside for a while. Thermal underwear, a neck gaiter, hat, gloves and wool socks. Stargazing for those that can bear it! Listen to your body, and reschedule stargazing if you get uncomfortable!."
+                    }
+                }
+            }
+            // concatenate two advices to outfit HTML
+            outfit.innerHTML = clothAdvice + " " + starAdvice;
+        });
+    };
+
+    
+</script>
+</body>
+</html>
